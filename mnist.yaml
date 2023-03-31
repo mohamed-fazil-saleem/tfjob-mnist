@@ -1,0 +1,40 @@
+apiVersion: "kubeflow.org/v1"
+kind: "TFJob"
+metadata:
+  name: "dist-mnist-for-e2e-test"
+spec:
+  tfReplicaSpecs:
+    Chief:
+      replicas: 1
+      restartPolicy: Never
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          containers:
+            - name: tensorflow
+              image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+              command: [
+                  "python",
+                  "/var/tf_mnist/mnist_with_summaries.py",
+                  "--log_dir=/train/logs", "--learning_rate=0.01",
+                  "--batch_size=150"
+                  ]
+    Worker:
+      replicas: 2
+      restartPolicy: Never
+      template:
+        metadata:
+          annotations:
+            sidecar.istio.io/inject: "false"
+        spec:
+          containers:
+            - name: tensorflow
+              image: gcr.io/kubeflow-ci/tf-mnist-with-summaries:1.0
+              command: [
+                  "python",
+                  "/var/tf_mnist/mnist_with_summaries.py",
+                  "--log_dir=/train/logs", "--learning_rate=0.01",
+                  "--batch_size=150"
+                  ]
